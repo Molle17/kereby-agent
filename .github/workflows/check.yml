@@ -1,9 +1,9 @@
-name: Kereby Listing Checker
+name: Check Kereby Listings
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # runs every 10 minutes
-  workflow_dispatch:          # allows manual trigger
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   check:
@@ -19,7 +19,9 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: |
+          pip install requests beautifulsoup4 playwright
+          playwright install chromium
 
       - name: Run checker
         env:
@@ -31,5 +33,5 @@ jobs:
       - name: Save seen listings
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update seen listings"
+          commit_message: Update seen listings
           file_pattern: seen_listings.json
