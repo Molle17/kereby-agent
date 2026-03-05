@@ -29,7 +29,7 @@ def send_email(new_listings):
     msg["Subject"] = f"🏠 {len(new_listings)} new listing(s) on Kereby!"
     msg["From"] = EMAIL_FROM
     msg["To"] = EMAIL_TO
-    with smtplib.SMTP("smtp.office365.com", 587) as server:
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         server.send_message(msg)
