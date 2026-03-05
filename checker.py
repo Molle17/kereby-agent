@@ -1,14 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
 import json
 import smtplib
 import os
 from email.mime.text import MIMEText
 from datetime import datetime
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 SEEN_FILE = "seen_listings.json"
 URL = "https://kerebyudlejning.dk/"
-
 EMAIL_FROM = os.environ["EMAIL_FROM"]
 EMAIL_TO = os.environ["EMAIL_TO"]
 EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
@@ -38,18 +37,23 @@ def send_email(new_listings):
 
 def check_listings():
     print(f"[{datetime.now()}] Checking listings...")
-    r = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
-    soup = BeautifulSoup(r.text, "html.parser")
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(URL, wait_until="networkidle")
+        content = page.content()
+        browser.close()
 
-    # ⚠️ UPDATE THIS with the CSS class you found in Step 1
+    soup = BeautifulSoup(content, "html.parser")
     listings = soup.select(".rental-card")
     print(f"Found {len(listings)} listings")
 
     current = {}
     for l in listings:
         title = l.get_text(strip=True)[:120]
-        link_tag = l.find("a")
-        link = link_tag["href"] if link_tag else ""
+        link = l.get("href", "")
+        if not link.startswith("http"):
+            link = "https://kerebyudlejning.dk" + link
         key = title + link
         current[key] = f"{title}\n{link}"
 
