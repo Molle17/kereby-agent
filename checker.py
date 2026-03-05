@@ -43,6 +43,7 @@ def check_listings():
 
     # ⚠️ UPDATE THIS with the CSS class you found in Step 1
     listings = soup.select(".rental-card")
+    print(f"Found {len(listings)} listings")
 
     current = {}
     for l in listings:
